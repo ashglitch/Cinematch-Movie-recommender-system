@@ -1,0 +1,333 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Watchlist | CineMatch</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #090909;
+            color: #f5f3fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .watchlist-header {
+            background: linear-gradient(110deg, #101010, #3a080d);
+            padding: 24px 7.5%;
+            border-bottom: 1px solid #3a2527;
+        }
+
+        .watchlist-header .logo {
+            color: #ff5a62;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .watchlist-header p {
+            color: #c5c5c5;
+            margin: 8px 0 0;
+        }
+
+        .watchlist-container {
+            width: 85%;
+            max-width: 1400px;
+            margin: 40px auto;
+        }
+
+        .watchlist-container h1 {
+            color: #ff5a62;
+            font-size: 32px;
+            margin-bottom: 28px;
+        }
+
+        /* Responsive poster grid */
+        .watchlist-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 22px;
+            align-items: start;
+        }
+
+        .watchlist-card {
+            min-width: 0;
+            padding: 12px;
+            overflow: hidden;
+            background: #171717;
+            border: 1px solid #3a2527;
+            border-radius: 12px;
+            transition: transform 0.2s ease,
+                        border-color 0.2s ease;
+        }
+
+        .watchlist-card:hover {
+            transform: translateY(-4px);
+            border-color: #c8102e;
+        }
+
+        .watchlist-poster {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            aspect-ratio: 2 / 3;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 8px;
+            margin: 0 0 12px;
+        }
+
+        .poster-placeholder {
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #242020;
+            border-radius: 8px;
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .watchlist-card h2 {
+            color: #ff5a62;
+            font-size: 17px;
+            line-height: 1.35;
+            overflow-wrap: anywhere;
+            margin: 8px 0;
+        }
+
+        .watchlist-meta {
+            color: #c5c5c5;
+            font-size: 13px;
+            margin: 8px 0;
+        }
+
+        .watchlist-rating {
+            font-size: 13px;
+            margin: 8px 0 14px;
+        }
+
+        .watchlist-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .watchlist-actions a {
+            color: #ff5a62;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .watchlist-actions a:hover {
+            text-decoration: underline;
+        }
+
+        .watchlist-actions form {
+            width: 100%;
+            margin: 0;
+        }
+
+        .remove-button {
+            width: 100%;
+            padding: 9px 10px;
+            background: #30203d;
+            color: #f5dfff;
+            border: 1px solid #7d1b24;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .remove-button:hover {
+            background: #c8102e;
+            color: white;
+        }
+
+        .empty-watchlist {
+            background: #171717;
+            border: 1px solid #3a2527;
+            border-radius: 12px;
+            padding: 32px;
+        }
+
+        .empty-watchlist h2 {
+            color: #ff5a62;
+        }
+
+        .browse-button {
+            display: inline-block;
+            padding: 12px 18px;
+            background: #c8102e;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .browse-button:hover {
+            background: #7e22ce;
+        }
+
+        .watchlist-footer {
+            padding: 25px;
+            text-align: center;
+            color: #a9a1b5;
+        }
+
+        @media (max-width: 1100px) {
+            .watchlist-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 800px) {
+            .watchlist-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .watchlist-container {
+                width: 90%;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .watchlist-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+            }
+
+            .watchlist-container h1 {
+                font-size: 26px;
+            }
+
+            .watchlist-header {
+                padding: 20px 5%;
+            }
+
+            .watchlist-container {
+                width: 90%;
+                margin-top: 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="watchlist-header">
+    <a class="logo" href="{% url 'home' %}"> CineMatch</a>
+    <p>My Watchlist </p>
+</header>
+
+<main class="watchlist-container">
+
+    <h1>My Watchlist </h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    {% if items %}
+
+        <div class="watchlist-grid">
+
+            {% for item in items %}
+
+                <article class="watchlist-card">
+
+                    {% if item.movie.poster_url %}
+                        <img
+                            class="watchlist-poster"
+                            src="{{ item.movie.poster_url }}"
+                            alt="{{ item.movie.title }} poster"
+                            loading="lazy"
+                        >
+                    {% else %}
+                        <div class="poster-placeholder">CM</div>
+                    {% endif %}
+
+                    <h2>{{ item.movie.title }}</h2>
+
+                    <p class="watchlist-meta">
+                        {{ item.movie.genre }} · {{ item.movie.year }}
+                    </p>
+
+                    <p class="watchlist-rating">
+                        Rating: {{ item.movie.rating|floatformat:1 }}/10
+                    </p>
+
+                    <div class="watchlist-actions">
+
+                        <a href="/?movie={{ item.movie.id }}">
+                            Find Similar Movies →
+                        </a>
+
+                        <form
+                            method="POST"
+                            action="{% url 'remove_from_watchlist' item.movie.id %}"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="remove-button"
+                            >
+                                 Remove
+                            </button>
+                        </form>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <section class="empty-watchlist">
+            <h2>Your watchlist is empty </h2>
+
+            <p>
+                Found something you want to watch?
+                Add it to your watchlist and it will appear here.
+            </p>
+
+            <a href="{% url 'home' %}" class="browse-button">
+                Explore Movies 
+            </a>
+        </section>
+
+    {% endif %}
+
+    <p style="margin-top: 30px;">
+        <a href="{% url 'home' %}" class="browse-button">
+            ← Back to CineMatch
+        </a>
+    </p>
+
+</main>
+
+<footer class="watchlist-footer">
+     CineMatch — Discover your next favourite movie.
+</footer>
+
+</body>
+</html>

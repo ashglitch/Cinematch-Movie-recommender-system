@@ -1,0 +1,542 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineMatch | Movie Discovery</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+        /* Header navigation */
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .user-navigation {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .user-navigation form {
+            margin: 0;
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: 10px 15px;
+            border: 1px solid #7d1b24;
+            border-radius: 8px;
+            background: #24090c;
+            color: #ffd7d9;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .nav-button:hover,
+        .watchlist-button:hover {
+            background: #c8102e;
+            color: white;
+        }
+
+        .signup-button {
+            background: #c8102e;
+            color: white;
+        }
+
+        .welcome-user {
+            color: #ffd7d9;
+        }
+
+        /* Watchlist button */
+        .watchlist-button {
+            margin-top: 10px;
+            padding: 9px 12px;
+            background: #c8102e;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .watchlist-form {
+            margin: 0;
+        }
+
+        /* Movie posters */
+        .movie-card > img.movie-poster {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            aspect-ratio: 2 / 3;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .poster-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            background: #242020;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 40px;
+        }
+
+        .selected-poster {
+            width: 180px;
+            max-width: 100%;
+            aspect-ratio: 2 / 3;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .selected-movie {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            margin: 20px 0 30px;
+        }
+
+        .user-message {
+            padding: 10px 14px;
+            margin: 12px 0;
+            border-radius: 8px;
+            background: #24090c;
+            color: #ffd7d9;
+        }
+
+        @media (max-width: 600px) {
+            .selected-movie {
+                flex-direction: column;
+            }
+
+            .header-content {
+                align-items: flex-start;
+            }
+        }
+    </style>
+
+
+    <style>
+    .wheel-section{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,390px);gap:36px;align-items:center;margin:42px 0;padding:30px;background:linear-gradient(125deg,#171717,#21090c);border:1px solid #482126;border-radius:18px;overflow:hidden}
+    .eyebrow{color:#ff5a62;letter-spacing:.16em;font-size:12px;font-weight:800}
+    .wheel-copy h2{margin:8px 0;font-size:clamp(26px,3vw,38px)}
+    .wheel-copy>p:not(.eyebrow):not(.wheel-result){color:#c5c5c5;max-width:480px}
+    .wheel-stage{position:relative;width:min(100%,340px);aspect-ratio:1;margin:auto}
+    .movie-wheel{width:100%;height:100%;border-radius:50%;border:8px solid #252525;box-shadow:0 0 0 2px #c8102e,0 18px 50px #0009;background:conic-gradient(#c8102e 0deg 45deg,#171717 45deg 90deg,#8d0c19 90deg 135deg,#292929 135deg 180deg,#c8102e 180deg 225deg,#171717 225deg 270deg,#8d0c19 270deg 315deg,#292929 315deg 360deg);transition:transform 4s cubic-bezier(.12,.72,.12,1);position:relative}
+    .movie-wheel:before{content:"";position:absolute;inset:12%;border:1px solid #ffffff30;border-radius:50%}
+    .wheel-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:94px;height:94px;border-radius:50%;background:#0b0b0b;border:3px solid #f2f2f2;display:grid;place-content:center;text-align:center;font-weight:900;letter-spacing:.08em;font-size:13px;line-height:1.35;box-shadow:0 4px 18px #0009}
+    .wheel-pointer{position:absolute;z-index:2;top:-7px;left:calc(50% - 13px);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:28px solid #f5f5f5;filter:drop-shadow(0 2px 3px #000)}
+    .wheel-result{font-weight:700;color:#fff;margin:18px 0 10px}.wheel-link{display:inline-block;margin-top:4px}
+    @media(max-width:700px){.wheel-section{grid-template-columns:1fr;padding:22px}.wheel-stage{width:min(78vw,310px);grid-row:1}}
+    </style>
+</head>
+
+<body>
+
+<header class="site-header">
+    <div class="header-content">
+        <div>
+            <a class="logo" href="{% url 'home' %}"> CineMatch</a>
+            <p>Find your next favourite movie.</p>
+        </div>
+
+        <nav class="user-navigation">
+            {% if user.is_authenticated %}
+                <span class="welcome-user">
+                    Hi, {{ user.username }} 
+                </span>
+
+                <a href="{% url 'watchlist' %}" class="nav-button">
+                     My Watchlist
+                </a>
+
+                <form method="POST" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-button">
+                        Log Out
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="nav-button">
+                    Log In
+                </a>
+
+                <a href="{% url 'signup' %}"
+                   class="nav-button signup-button">
+                    Sign Up
+                </a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+
+    {% if messages %}
+        {% for message in messages %}
+            <p class="user-message">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    {% if best_matches or discover %}
+
+        <section class="recommendations-section">
+            <h1>Your Personalised Recommendations </h1>
+
+            {% if best_matches %}
+                <h2>Best Matches</h2>
+
+                <div class="movie-grid">
+                    {% for item in best_matches %}
+                        <article class="movie-card">
+
+                            {% if item.movie.poster_url %}
+                                <img class="movie-poster"
+                                     src="{{ item.movie.poster_url }}"
+                                     alt="{{ item.movie.title }} poster"
+                                     loading="lazy">
+                            {% else %}
+                                <div class="poster-placeholder">CM</div>
+                            {% endif %}
+
+                            <h3>{{ item.movie.title }}</h3>
+                            <p class="movie-meta">
+                                {{ item.movie.genre }} · {{ item.movie.year }}
+                            </p>
+                            <p class="rating">
+                                Rating: {{ item.movie.rating|floatformat:1 }}/10
+                            </p>
+                            <p class="movie-description">
+                                {{ item.movie.description }}
+                            </p>
+
+                            {% if item.score != None %}
+                                <p class="match-score">
+                                    Match score: {{ item.score|floatformat:1 }}%
+                                </p>
+                            {% endif %}
+
+                            <a class="movie-link"
+                               href="/?movie={{ item.movie.id }}">
+                                Find Similar Movies
+                            </a>
+
+                            <form class="watchlist-form"
+                                  method="POST"
+                                  action="{% url 'add_to_watchlist' item.movie.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next"
+                                       value="{{ request.get_full_path }}">
+                                <button class="watchlist-button" type="submit">
+                                     Add to Watchlist
+                                </button>
+                            </form>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if discover %}
+                <h2>Discover Something New </h2>
+
+                <div class="movie-grid">
+                    {% for item in discover %}
+                        <article class="movie-card">
+
+                            {% if item.movie.poster_url %}
+                                <img class="movie-poster"
+                                     src="{{ item.movie.poster_url }}"
+                                     alt="{{ item.movie.title }} poster"
+                                     loading="lazy">
+                            {% else %}
+                                <div class="poster-placeholder">CM</div>
+                            {% endif %}
+
+                            <h3>{{ item.movie.title }}</h3>
+                            <p class="movie-meta">
+                                {{ item.movie.genre }} · {{ item.movie.year }}
+                            </p>
+                            <p class="rating">
+                                Rating: {{ item.movie.rating|floatformat:1 }}/10
+                            </p>
+                            <p class="movie-description">
+                                {{ item.movie.description }}
+                            </p>
+
+                            {% if item.score != None %}
+                                <p class="match-score">
+                                    Match score: {{ item.score|floatformat:1 }}%
+                                </p>
+                            {% endif %}
+
+                            <a class="movie-link"
+                               href="/?movie={{ item.movie.id }}">
+                                Find Similar Movies
+                            </a>
+
+                            <form class="watchlist-form"
+                                  method="POST"
+                                  action="{% url 'add_to_watchlist' item.movie.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next"
+                                       value="{{ request.get_full_path }}">
+                                <button class="watchlist-button" type="submit">
+                                     Add to Watchlist
+                                </button>
+                            </form>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <a class="back-link" href="{% url 'home' %}">
+                ← Back to all movies
+            </a>
+        </section>
+
+    {% elif selected_movie %}
+
+        <section class="recommendations-section">
+            <h1>Movies Similar to {{ selected_movie.title }}</h1>
+
+            <article class="selected-movie">
+                {% if selected_movie.poster_url %}
+                    <img class="selected-poster"
+                         src="{{ selected_movie.poster_url }}"
+                         alt="{{ selected_movie.title }} poster">
+                {% endif %}
+
+                <div>
+                    <h2>{{ selected_movie.title }}</h2>
+                    <p>
+                        {{ selected_movie.genre }} · {{ selected_movie.year }}
+                    </p>
+                    <p>Rating: {{ selected_movie.rating|floatformat:1 }}/10</p>
+                    <p>{{ selected_movie.description }}</p>
+
+                    <form method="POST"
+                          action="{% url 'add_to_watchlist' selected_movie.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next"
+                               value="{{ request.get_full_path }}">
+                        <button class="watchlist-button" type="submit">
+                             Add to Watchlist
+                        </button>
+                    </form>
+                </div>
+            </article>
+
+            <h2>You Might Also Like</h2>
+
+            <div class="movie-grid">
+                {% for item in recommendations %}
+                    <article class="movie-card similar-movie-card">
+
+                        {% if item.movie.poster_url %}
+                            <img class="movie-poster"
+                                 src="{{ item.movie.poster_url }}"
+                                 alt="{{ item.movie.title }} poster"
+                                 loading="lazy">
+                        {% else %}
+                            <div class="poster-placeholder">CM</div>
+                        {% endif %}
+
+                        <h3>{{ item.movie.title }}</h3>
+                        <p class="movie-meta">
+                            {{ item.movie.genre }} · {{ item.movie.year }}
+                        </p>
+                        <p class="rating">
+                            Rating: {{ item.movie.rating|floatformat:1 }}/10
+                        </p>
+                        <p class="movie-description">
+                            {{ item.movie.description }}
+                        </p>
+                        <p class="match-score">
+                            Similarity: {{ item.similarity }}%
+                        </p>
+
+                        <a class="movie-link"
+                           href="/?movie={{ item.movie.id }}">
+                            Find Similar Movies
+                        </a>
+
+                        <form class="watchlist-form"
+                              method="POST"
+                              action="{% url 'add_to_watchlist' item.movie.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next"
+                                   value="{{ request.get_full_path }}">
+                            <button class="watchlist-button" type="submit">
+                                 Add to Watchlist
+                            </button>
+                        </form>
+                    </article>
+                {% empty %}
+                    <p>No similar movies found.</p>
+                {% endfor %}
+            </div>
+
+            <a class="back-link" href="{% url 'home' %}">
+                ← Back to all movies
+            </a>
+        </section>
+
+    {% else %}
+
+        <section class="personalize-section">
+            <h1>Find Movies You'll Love </h1>
+            <p>Choose your favourite genres and optionally a movie you enjoy.</p>
+
+            <form method="POST" class="personalize-form">
+                {% csrf_token %}
+
+                <h2>Choose Your Favourite Genres</h2>
+
+                <div class="genre-options">
+                    {% for value, label in genre_choices %}
+                        <label class="genre-option">
+                            <input type="checkbox" name="genres"
+                                   value="{{ value }}">
+                            <span>{{ label }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+
+                <label class="form-label" for="favorite_movie">
+                    Choose a favourite movie (optional)
+                </label>
+
+                <select name="favorite_movie"
+                        id="favorite_movie"
+                        class="favorite-movie-select">
+                    <option value="">No specific movie</option>
+                    {% for movie in movies %}
+                        <option value="{{ movie.id }}">
+                            {{ movie.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="primary-button">
+                    Find My Matches 
+                </button>
+            </form>
+        </section>
+
+        <section class="wheel-section">
+            <div class="wheel-copy">
+                <p class="eyebrow">THE CINEMATCH PICKER</p>
+                <h2>Too many choices?</h2>
+                <p>Let the wheel choose your next watch. Filter by genre first, or leave it open for a surprise.</p>
+                <label class="form-label" for="wheelGenre">Wheel category</label>
+                <select id="wheelGenre">
+                    <option value="All">All genres</option>
+                    {% for value, label in genre_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                </select>
+                <button type="button" class="primary-button" id="spinWheel">Spin the wheel</button>
+                <p id="wheelResult" class="wheel-result" aria-live="polite">Your next movie is one spin away.</p>
+                <a id="wheelMovieLink" class="movie-link wheel-link" href="#" hidden>View movie details</a>
+            </div>
+            <div class="wheel-stage">
+                <div class="wheel-pointer"></div>
+                <div id="movieWheel" class="movie-wheel" role="img" aria-label="Movie selection wheel">
+                    <div class="wheel-center">CINE<br>MATCH</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="catalogue-section">
+            <h1>Explore Movies </h1>
+
+            <div class="filter-bar">
+                <input type="text"
+                       id="searchInput"
+                       placeholder="Search movies by title...">
+
+                <select id="genreFilter">
+                    <option value="All">All Genres</option>
+                    {% for value, label in genre_choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="movie-grid" id="movieList">
+                {% for movie in movies %}
+                    <article class="movie-card"
+                             data-title="{{ movie.title|lower }}"
+                             data-genre="{{ movie.genre }}">
+
+                        {% if movie.poster_url %}
+                            <img class="movie-poster"
+                                 src="{{ movie.poster_url }}"
+                                 alt="{{ movie.title }} poster"
+                                 loading="lazy">
+                        {% else %}
+                            <div class="poster-placeholder">CM</div>
+                        {% endif %}
+
+                        <h3>{{ movie.title }}</h3>
+                        <p class="movie-meta">
+                            {{ movie.genre }} · {{ movie.year }}
+                        </p>
+                        <p class="rating">
+                            ⭐ {{ movie.rating|floatformat:1 }}/10
+                        </p>
+                        <p class="movie-description">
+                            {{ movie.description }}
+                        </p>
+
+                        <a class="movie-link"
+                           href="/?movie={{ movie.id }}">
+                            Find Similar Movies
+                        </a>
+
+                        <form class="watchlist-form"
+                              method="POST"
+                              action="{% url 'add_to_watchlist' movie.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next"
+                                   value="{{ request.get_full_path }}">
+                            <button class="watchlist-button" type="submit">
+                                 Add to Watchlist
+                            </button>
+                        </form>
+                    </article>
+                {% empty %}
+                    <p>No movies have been added yet.</p>
+                {% endfor %}
+            </div>
+
+            <p id="noResults" class="no-results" style="display:none;">
+                No movies found. Try another search.
+            </p>
+        </section>
+
+    {% endif %}
+
+</main>
+
+<footer class="site-footer">
+    <p> CineMatch | Curated for your next great watch.</p>
+</footer>
+
+<script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

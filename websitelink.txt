@@ -1,0 +1,14 @@
+CineMatch — local run instructions (Windows)
+
+1. Extract the ZIP and open the folder containing manage.py in VS Code.
+2. Open Terminal > New Terminal.
+3. Run:
+   py -m venv .venv
+   .venv\Scripts\activate
+   pip install -r requirements.txt
+   py manage.py migrate
+   py manage.py load_movies
+   py manage.py runserver
+4. Open http://127.0.0.1:8000/ in your browser.
+
+To import the larger educational catalogue, run `py manage.py import_movielens` after setup.

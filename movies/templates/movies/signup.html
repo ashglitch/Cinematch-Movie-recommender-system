@@ -1,0 +1,82 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | CineMatch</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .auth-box {
+            max-width: 430px;
+            margin: 50px auto;
+            padding: 32px;
+            background: #171717;
+            border: 1px solid #3a2527;
+            border-radius: 16px;
+        }
+        .auth-box h1 { color: #ff5a62; margin-top: 0; }
+        .auth-box input {
+            display: block;
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 16px;
+            background: #242020;
+            color: white;
+            border: 1px solid #514143;
+            border-radius: 8px;
+        }
+        .auth-box button {
+            width: 100%;
+            padding: 13px;
+            background: #c8102e;
+            color: white;
+            border: 0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .auth-box a { color: #ff5a62; }
+        .auth-box .errorlist, .auth-box .helptext {
+            color: #c7b9d5;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+<header class="site-header">
+    <div class="header-content">
+        <a class="logo" href="{% url 'home' %}"> CineMatch</a>
+        <p>Join CineMatch and find your next favourite.</p>
+    </div>
+</header>
+
+<main class="container">
+    <section class="auth-box">
+        <h1>Create Your Account </h1>
+
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {{ field.errors }}
+                {% if field.help_text %}
+                    <div class="helptext">{{ field.help_text }}</div>
+                {% endif %}
+            {% endfor %}
+
+            <button type="submit">Create Account</button>
+        </form>
+
+        <p>Already have an account?
+            <a href="{% url 'login' %}">Log in</a>
+        </p>
+        <p><a href="{% url 'home' %}">← Back to movies</a></p>
+    </section>
+</main>
+</body>
+</html>
